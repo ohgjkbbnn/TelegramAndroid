@@ -1,0 +1,57 @@
+name: Build
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Free disk
+        run: |
+          sudo rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*.deb
+          sudo rm -rf /usr/share/doc /usr/share/man /usr/share/info /usr/share/locale
+          sudo rm -rf /opt/pip /opt/ghc /root/.cache/pip /opt/hostedtoolcache/node
+          sudo rm -rf /root/.gradle/caches/modules-2
+          docker system prune -af --volumes  true
+          df -h / | tail -1
+
+      - uses: actions/setup-java@v4
+        with: { java-version: '17', distribution: temurin }
+
+      - uses: android-actions/setup-android@v3
+
+      - name: SDK
+        run: |
+          sdkmanager --install "platform-tools" "platforms;android-36" \
+            "build-tools;35.0.0" "ndk;27.2.12479018" "cmake;3.22.1"  true
+          yes | sdkmanager --licenses > /dev/null
+
+      - name: Keys
+        env:
+          A: ${{ secrets.TG_APP_ID }}
+          H: ${{ secrets.TG_APP_HASH }}
+        run: |
+          [ -z "$A" ] && { echo "::error::нет секретов"; exit 1; }
+          sed -i "s|^APP_ID=.*|APP_ID=$A|" gradle.properties
+          sed -i "s|^APP_HASH=.*|APP_HASH=$H|" gradle.properties
+
+      - name: Gradle memory
+        run: echo "org.gradle.jvmargs=-Xmx12g" >> gradle.properties
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: g-${{ hashFiles('**/*.gradle*') }}-${{ runner.os }}
+
+      - name: Build
+        run: ./gradlew :TMessagesProj_App:assembleRelease -Parm64-v8a --no-daemon --console=plain
+
+      - name: Upload
+        run: |
+          mkdir -p out
+          APK=$(find TMessagesProj_App/build/outputs/apk -name '*.apk' | xargs ls -t | head -1)
+          cp "$APK" out/TrueGram.apk && ls -lh out/TrueGram.apk
+        if: always()
+
+      - uses: actions/upload-artifact@v4
+        with: { name: TrueGram-apk, path: out/TrueGram.apk, if-no-files-found: error }
