@@ -69,12 +69,17 @@ jobs:
           sudo apt update
           sudo apt -y install ninja-build meson nasm gperf pkg-config unzip pip
           rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
-          ./gradlew :TMessagesProj_App:assembleAfatRelease
+          ./gradlew :TMessagesProj_App:assembleAfatDebug
 
-          grep VERSION_NAME TMessagesProj/build/generated/source/buildConfig/release/org/telegram/messenger/BuildConfig.java | cut -d'"' -f 2 > ver.txt
+          BC=$(find TMessagesProj/build/generated/source/buildConfig -name BuildConfig.java -path "*org/telegram/messenger*" | head -1)
+          grep VERSION_NAME "$BC" | cut -d'"' -f 2 > ver.txt
+          cat ver.txt
+
+          APK=$(find TMessagesProj_App/build/outputs/apk -name "*.apk" | grep -i afat | grep -i debug | head -1)
+          echo "APK found: $APK"
 
           mkdir -p artifact
-          mv TMessagesProj_App/build/outputs/apk/afat/release/app.apk app.apk
+          cp "$APK" app.apk
           cp app.apk "artifact/ForkClient $(cat ver.txt).apk"
           mkdir -p tag_asset
           cp app.apk "tag_asset/ForkClient_$(cat ver.txt).apk"
