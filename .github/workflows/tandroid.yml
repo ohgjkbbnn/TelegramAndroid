@@ -36,7 +36,7 @@ jobs:
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;27.2.12479018"
       - name: Prepare additional build number.
         env:
-          ADDITIONAL_BUILD: ${{ secrets.ADDITIONAL_BUILD_NUMBER }}
+          ADDITIONAL_BUILD: ${{ secrets.ADDITIONAL_BUILD_NUMBER || '0' }}
         run: |
           result=$((ADDITIONAL_BUILD / 10000))
           echo "ADDITIONAL_BUILD_NUMBER = $result should be between 0 and 10!"
@@ -50,8 +50,8 @@ jobs:
 
           echo "DUMMY_CONST=0" >> $vars
           echo "org.gradle.workers.max=1" >> $vars
-          echo "APP_ID=${{ secrets.APP_ID }}" >> $vars
-          echo "APP_HASH=${{ secrets.APP_HASH }}" >> $vars
+          echo "APP_ID=${{ secrets.APP_ID || '0' }}" >> $vars
+          echo "APP_HASH=${{ secrets.APP_HASH || 'none' }}" >> $vars
           echo "RELEASE_KEY_PASSWORD=${{ secrets.ALIAS_PASS }}" >> $vars
           echo "RELEASE_KEY_ALIAS=${{ secrets.ALIAS_NAME }}" >> $vars
           echo "RELEASE_STORE_PASSWORD=${{ secrets.KEYSTORE_PASS }}" >> $vars
@@ -59,10 +59,10 @@ jobs:
           echo "ADDITIONAL_BUILD_NUMBER=$ADDITIONAL_BUILD_NUMBER" >> $vars
           echo "USER_REPO=$USER_REPO" >> $vars
           echo "CHECK_UPDATES=1" >> $vars
-          echo "USER_ID_OWNER=${{ secrets.USER_ID_OWNER }}" >> $vars
-          echo "UPDATE_CHANNEL_USERNAME=${{ secrets.UPDATE_CHANNEL_USERNAME }}" >> $vars
-          echo "LASTFM_API_KEY=${{ secrets.LASTFM_API_KEY }}" >> $vars
-          echo "LASTFM_API_SECRET=${{ secrets.LASTFM_API_SECRET }}" >> $vars
+          echo "USER_ID_OWNER=${{ secrets.USER_ID_OWNER || '0' }}" >> $vars
+          echo "UPDATE_CHANNEL_USERNAME=${{ secrets.UPDATE_CHANNEL_USERNAME || 'none' }}" >> $vars
+          echo "LASTFM_API_KEY=${{ secrets.LASTFM_API_KEY || 'none' }}" >> $vars
+          echo "LASTFM_API_SECRET=${{ secrets.LASTFM_API_SECRET || 'none' }}" >> $vars
 
           ###
           echo $ADDITIONAL_BUILD_NUMBER
