@@ -63,8 +63,6 @@ public class BuildVars {
         }
 
         BUILD_VERSION_STRING = BuildConfig.VERSION_NAME;
-        APP_ID = BuildConfig.APP_ID;
-        APP_HASH = BuildConfig.APP_HASH;
         PLAYSTORE_APP_URL = "";
         DEBUG_VERSION = false;
         CHECK_UPDATES = (BuildConfig.CHECK_UPDATES != 0);
