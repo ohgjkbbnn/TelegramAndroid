@@ -1,9 +1,10 @@
 name: Fork Client
 
 on:
+  workflow_dispatch:
   push:
     branches:
-      - '**'
+      - dev
 
 jobs:
   linux:
@@ -111,7 +112,6 @@ jobs:
         with:
           subject-path: 'artifact/*.apk'
 
-      # Теперь загружается при КАЖДОМ пуше (без условия [Release])
       - uses: actions/upload-artifact@v4
         name: Upload artifact
         with:
