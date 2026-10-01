@@ -70,7 +70,6 @@ jobs:
           rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
           ./gradlew :TMessagesProj_App:assembleAfatRelease
 
-          #grep BUILD_VERSION_STRING TMessagesProj/src/main/java/org/telegram/messenger/BuildVars.java | cut -d'"' -f 2 > ver.txt
           grep VERSION_NAME TMessagesProj/build/generated/source/buildConfig/release/org/telegram/messenger/BuildConfig.java | cut -d'"' -f 2 > ver.txt
 
           mkdir -p artifact
@@ -112,9 +111,9 @@ jobs:
         with:
           subject-path: 'artifact/*.apk'
 
-      - uses: actions/upload-artifact@master
+      # Теперь загружается при КАЖДОМ пуше (без условия [Release])
+      - uses: actions/upload-artifact@v4
         name: Upload artifact
-        if: ${{ contains(github.event.head_commit.message, '[Release]') }}
         with:
           name: ForkClient
           path: artifact/
