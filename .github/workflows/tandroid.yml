@@ -23,6 +23,33 @@ jobs:
           java-version: 17
           cache: gradle
 
+      # === НОВЫЙ ШАГ: установка инструментов для сборки нативных библиотек ===
+      # Без meson падал скрипт buildNativeDeps ("ERROR: meson is required"),
+      # из-за чего boringssl не компилировался и Gradle не находил .so файлы
+      - name: Install native build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            meson \
+            ninja-build \
+            cmake \
+            pkg-config \
+            build-essential \
+            python3 \
+            python3-pip \
+            yasm \
+            nasm \
+            perl \
+            autoconf \
+            automake \
+            libtool
+          echo "--- versions ---"
+          meson --version
+          ninja --version
+          cmake --version
+          python3 --version
+      # =======================================================================
+
       - name: Generate keystore
         run: |
           rm -f TMessagesProj/config/release.keystore
@@ -42,6 +69,8 @@ jobs:
             -PRELEASE_KEY_PASSWORD=android \
             -PRELEASE_KEY_ALIAS=androidkey \
             -PRELEASE_STORE_PASSWORD=android
+        env:
+          GRADLE_OPTS: "-Xmx4g -XX:MaxMetaspaceSize=1g"
 
       - name: Upload APK
         if: success()
